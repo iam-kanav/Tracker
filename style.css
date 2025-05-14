@@ -1,13 +1,18 @@
 :root {
-    --bg-color: #1e1e1e; /* Dark background */
-    --surface-color: #2d2d2d; /* Slightly lighter for cards/sections */
-    --primary-text-color: #e0e0e0; /* Light grey text */
-    --secondary-text-color: #a0a0a0; /* Dimmer text */
-    --accent-color: #00aaff; /* A vibrant blue */
-    --accent-color-darker: #0077cc;
-    --danger-color: #e74c3c;
+    --primary-bg: #121212; /* Very dark grey / black */
+    --secondary-bg: #1e1e1e; /* Dark grey for cards */
+    --tertiary-bg: #2a2a2a; /* Slightly lighter for inputs, etc. */
+    --primary-text: #e0e0e0; /* Light grey / off-white */
+    --secondary-text: #a0a0a0; /* Dimmer grey */
+    --accent-color: #3498db; /* Vibrant Blue */
+    --accent-hover: #2980b9;
     --success-color: #2ecc71;
-    --font-family: 'Roboto', sans-serif;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --font-family: 'Poppins', sans-serif;
+    --border-radius: 8px;
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --modal-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
 }
 
 * {
@@ -18,126 +23,266 @@
 
 body {
     font-family: var(--font-family);
-    background-color: var(--bg-color);
-    color: var(--primary-text-color);
+    background-color: var(--primary-bg);
+    color: var(--primary-text);
     line-height: 1.6;
-    padding: 15px;
+    font-size: 16px; /* Base for mobile */
 }
 
-.container {
-    max-width: 600px;
+.app-container {
+    max-width: 600px; /* Good for mobile focus, expands reasonably on desktop */
     margin: 0 auto;
-    background-color: var(--surface-color);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
-}
-
-header {
-    text-align: center;
-    margin-bottom: 25px;
-    border-bottom: 1px solid #444;
-    padding-bottom: 15px;
-}
-
-header h1 {
-    color: var(--accent-color);
-    margin-bottom: 5px;
-}
-
-header .date-display {
-    font-size: 0.9em;
-    color: var(--secondary-text-color);
-}
-
-h2 {
-    color: var(--accent-color);
-    margin-bottom: 15px;
-    font-size: 1.4em;
-    border-bottom: 1px solid #444;
-    padding-bottom: 8px;
-}
-
-section {
-    margin-bottom: 25px;
     padding: 15px;
-    background-color: #333; /* Slightly different section background */
-    border-radius: 6px;
+    padding-bottom: 80px; /* Space for FAB */
 }
 
-.overview-item, .monthly-allocation .overview-item {
+/* --- Header --- */
+.app-header {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    padding: 8px 0;
-    font-size: 0.95em;
-    border-bottom: 1px dashed #4f4f4f;
+    padding: 15px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--tertiary-bg);
 }
-.overview-item:last-child, .monthly-allocation .overview-item:last-child {
-    border-bottom: none;
+.header-logo {
+    height: 40px;
+    width: auto; /* Or fixed width if you have one */
+    filter: drop-shadow(0 0 3px var(--accent-color)); /* Optional logo glow */
+}
+.app-header h1 {
+    font-size: 1.6em;
+    color: var(--accent-color);
+    font-weight: 600;
+    margin: 0 10px;
+    flex-grow: 1;
+}
+.header-info {
+    font-size: 0.9em;
+    color: var(--secondary-text);
 }
 
-.overview-item span:first-child {
-    color: var(--secondary-text-color);
+/* --- Cards --- */
+.card {
+    background-color: var(--secondary-bg);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    box-shadow: var(--card-shadow);
 }
-.overview-item span:last-child {
+.card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1em;
     font-weight: 500;
-    color: var(--primary-text-color);
+    color: var(--accent-color);
+    display: flex;
+    align-items: center;
+}
+.card h3 i {
+    margin-right: 10px;
+    font-size: 1.2em;
 }
 
-.daily-tracker .overview-item {
-    border-bottom: none;
+/* --- Dashboard Specific --- */
+.main-balance-card .amount {
+    font-size: 2.2em;
+    font-weight: 700;
+    color: var(--success-color);
+    text-align: center;
 }
+.daily-spend-tracker .amount-small {
+    font-size: 1.4em;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-align: center;
+}
+.daily-spend-tracker small {
+    display: block;
+    text-align: center;
+    font-size: 0.85em;
+    color: var(--secondary-text);
+    margin-top: 8px;
+}
+
+/* --- Progress Bar --- */
 .progress-bar-container {
     width: 100%;
-    background-color: #555;
-    border-radius: 4px;
-    margin: 5px 0 5px;
-    height: 18px;
+    background-color: var(--tertiary-bg);
+    border-radius: 20px;
+    height: 12px; /* Slimmer for aesthetics */
+    overflow: hidden;
 }
-
 .progress-bar {
     height: 100%;
     background-color: var(--success-color);
-    border-radius: 4px;
-    text-align: center;
+    border-radius: 20px;
+    transition: width 0.4s ease-in-out;
+    text-align: center; /* Could put text inside if thicker */
     color: white;
-    font-size: 0.8em;
-    line-height: 18px;
-    transition: width 0.3s ease-in-out;
+    font-size: 0.7em; /* If text inside */
 }
-.progress-bar.over-limit {
-    background-color: var(--danger-color);
+.progress-bar.warning { background-color: var(--warning-color); }
+.progress-bar.danger { background-color: var(--danger-color); }
+
+/* --- Monthly Summary --- */
+.monthly-summary h2, .transaction-section h2, .finance-rules h2 {
+    font-size: 1.3em;
+    margin-bottom: 10px;
+    color: var(--primary-text);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+.monthly-summary h2 i, .transaction-section h2 i, .finance-rules h2 i {
+    margin-right: 10px;
+    color: var(--accent-color);
 }
 
-.daily-tracker small {
-    font-size: 0.85em;
-    color: var(--secondary-text-color);
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two columns */
+    gap: 15px;
+    font-size: 0.9em;
 }
-
-.actions {
-    text-align: center;
+.summary-grid div {
+    display: flex;
+    flex-direction: column; /* Label above value */
 }
-
-.actions button, .modal-content button {
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-size: 1em;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+.summary-grid label {
+    color: var(--secondary-text);
+    font-size: 0.9em;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
 }
-
-.actions button:hover, .modal-content button:hover {
-    background-color: var(--accent-color-darker);
+.summary-grid label i {
+    margin-right: 6px;
+    font-size: 0.9em;
 }
+.summary-grid span {
+    font-weight: 600;
+    color: var(--primary-text);
+}
+.budget-remaining span.negative { color: var(--danger-color); }
+.actual-saved span { color: var(--success-color); }
 
-.actions button i {
+
+/* --- Transactions --- */
+.transaction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.filter-controls {
+    display: flex;
+    align-items: center;
+}
+.filter-controls label {
     margin-right: 8px;
+    font-size: 0.9em;
+    color: var(--secondary-text);
+}
+.filter-controls select {
+    background-color: var(--tertiary-bg);
+    color: var(--primary-text);
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-family: var(--font-family);
+    font-size: 0.9em;
 }
 
-/* Modal Styles */
+.transaction-list {
+    list-style-type: none;
+    padding: 0;
+}
+.transaction-list li {
+    background-color: var(--secondary-bg);
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease-in-out;
+}
+.transaction-list li:hover {
+    transform: translateY(-2px);
+}
+.transaction-icon {
+    font-size: 1.5em;
+    margin-right: 15px;
+    width: 30px; /* fixed width for alignment */
+    text-align: center;
+}
+.transaction-icon.income { color: var(--success-color); }
+.transaction-icon.expense { color: var(--danger-color); }
+
+.transaction-details {
+    flex-grow: 1;
+}
+.transaction-details .description {
+    font-weight: 500;
+    color: var(--primary-text);
+    display: block;
+}
+.transaction-details .category-date {
+    font-size: 0.8em;
+    color: var(--secondary-text);
+}
+.transaction-amount {
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-left: 10px;
+    min-width: 80px; /* To align amounts */
+    text-align: right;
+}
+.transaction-amount.income { color: var(--success-color); }
+.transaction-amount.expense { color: var(--danger-color); }
+
+.transaction-actions button {
+    background: none;
+    border: none;
+    color: var(--secondary-text);
+    cursor: pointer;
+    font-size: 1em;
+    padding: 5px;
+    margin-left: 5px;
+}
+.transaction-actions button:hover { color: var(--accent-color); }
+.transaction-actions button.delete:hover { color: var(--danger-color); }
+
+.no-transactions {
+    text-align: center;
+    padding: 20px;
+    color: var(--secondary-text);
+    font-style: italic;
+}
+
+/* --- Finance Rules --- */
+.finance-rules ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+.finance-rules li {
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    padding-left: 20px;
+    position: relative;
+}
+.finance-rules li::before {
+    content: "\f00c"; /* Font Awesome check icon */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    left: 0;
+    color: var(--accent-color);
+}
+
+
+/* --- Modals --- */
 .modal {
     display: none; /* Hidden by default */
     position: fixed;
@@ -147,168 +292,177 @@ section {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.6);
-    padding-top: 30px; /* Reduced padding for mobile */
+    background-color: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center; /* Center vertically */
 }
-
+.modal.active {
+    display: flex; /* Use flex to center content */
+}
 .modal-content {
-    background-color: var(--surface-color);
-    margin: 5% auto; /* Centered */
+    background-color: var(--secondary-bg);
+    margin: auto; /* Let flexbox handle centering */
     padding: 25px;
-    border: 1px solid #555;
-    width: 90%; /* Responsive width */
-    max-width: 500px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 450px;
+    box-shadow: var(--modal-shadow);
+    position: relative; /* For close button positioning */
 }
-
-.modal-content h2 {
+.modal-logo {
+    display: block;
+    height: 50px;
+    margin: 0 auto 20px auto;
+}
+.modal-content h2, .modal-content h3 {
+    text-align: center;
+    color: var(--accent-color);
     margin-top: 0;
+    margin-bottom: 20px;
 }
-
+.modal-content p {
+    text-align: center;
+    color: var(--secondary-text);
+    margin-bottom: 25px;
+    font-size: 0.95em;
+}
 .modal-content div {
-    margin-bottom: 15px;
+    margin-bottom: 18px;
 }
-
 .modal-content label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
     font-size: 0.9em;
-    color: var(--secondary-text-color);
+    font-weight: 500;
+    color: var(--secondary-text);
+    display: flex;
+    align-items: center;
 }
-
+.modal-content label i {
+    margin-right: 8px;
+    width: 16px; /* Ensure icon alignment */
+    text-align: center;
+}
 .modal-content input[type="number"],
 .modal-content input[type="text"],
 .modal-content input[type="date"],
 .modal-content select {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #555;
-    border-radius: 4px;
-    background-color: #444;
-    color: var(--primary-text-color);
+    padding: 12px;
+    border: 1px solid var(--tertiary-bg);
+    border-radius: 6px;
+    background-color: var(--tertiary-bg);
+    color: var(--primary-text);
+    font-family: var(--font-family);
     font-size: 1em;
 }
-
-.close-btn {
-    color: var(--secondary-text-color);
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+.modal-content input:focus, .modal-content select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--accent-hover);
 }
-
-.close-btn:hover,
-.close-btn:focus {
-    color: var(--primary-text-color);
-    text-decoration: none;
-    cursor: pointer;
-}
-
-/* Transactions List */
-.transactions-list ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.transactions-list li {
-    background-color: #3a3a3a;
-    padding: 10px 15px;
-    margin-bottom: 8px;
-    border-radius: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.9em;
-}
-
-.transactions-list li .details {
-    flex-grow: 1;
-}
-
-.transactions-list li .category {
-    font-size: 0.8em;
-    color: var(--secondary-text-color);
-    display: block;
-}
-.transactions-list li .description {
-    font-size: 0.9em;
-    color: var(--primary-text-color);
-     margin-top: 2px;
-}
-
-
-.transactions-list li .amount {
-    font-weight: 500;
-    min-width: 70px; /* Ensure amounts align somewhat */
-    text-align: right;
-}
-
-.transactions-list li .amount.income {
-    color: var(--success-color);
-}
-
-.transactions-list li .amount.expense {
-    color: var(--danger-color);
-}
-
-.transactions-list li .delete-btn {
+.close-modal-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
     background: none;
     border: none;
-    color: var(--secondary-text-color);
+    font-size: 1.5em;
+    color: var(--secondary-text);
     cursor: pointer;
-    font-size: 1.1em;
-    margin-left: 10px;
 }
-.transactions-list li .delete-btn:hover {
-    color: var(--danger-color);
+.close-modal-btn:hover { color: var(--primary-text); }
+
+/* --- Buttons --- */
+.btn {
+    padding: 12px 20px;
+    font-size: 1em;
+    font-family: var(--font-family);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    text-align: center;
+    font-weight: 500;
+    display: inline-flex; /* For icon alignment */
+    align-items: center;
+    justify-content: center;
+}
+.btn i { margin-right: 8px; }
+.btn:active { transform: scale(0.98); }
+
+.btn-primary {
+    background-color: var(--accent-color);
+    color: white;
+}
+.btn-primary:hover { background-color: var(--accent-hover); }
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+.btn-danger:hover { background-color: #c0392b; }
+
+
+.btn-block {
+    display: block;
+    width: 100%;
 }
 
-.filter-container {
-    margin-bottom: 15px;
+/* --- Floating Action Button (FAB) --- */
+.fab {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 56px;
+    height: 56px;
+    background-color: var(--accent-color);
+    color: white;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    font-size: 1.8em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 999;
+    transition: background-color 0.2s ease, transform 0.2s ease;
 }
-.filter-container label {
-    margin-right: 10px;
+.fab:hover {
+    background-color: var(--accent-hover);
+    transform: scale(1.05);
 }
-.filter-container select {
-    padding: 8px;
-    background-color: #444;
-    color: var(--primary-text-color);
-    border: 1px solid #555;
-    border-radius: 4px;
-}
+.fab:active { transform: scale(0.95); }
 
-
-.rules-goals ul {
-    list-style-position: inside;
-    padding-left: 0;
-}
-.rules-goals li {
-    margin-bottom: 8px;
-    font-size: 0.9em;
-}
-
+/* Footer */
 footer {
     text-align: center;
-    margin-top: 30px;
+    padding: 20px 0 10px 0;
     font-size: 0.8em;
-    color: var(--secondary-text-color);
+    color: var(--secondary-text);
+    margin-top: 30px;
 }
 
-/* Responsive adjustments */
-@media (max-width: 480px) {
-    body {
-        padding: 10px;
-    }
-    .container {
-        padding: 15px;
-    }
-    .modal-content {
-        padding: 20px;
-    }
-    h1 {
-        font-size: 1.8em;
-    }
-    h2 {
-        font-size: 1.2em;
-    }
+/* --- Responsive Adjustments --- */
+@media (min-width: 600px) {
+    body { font-size: 17px; } /* Slightly larger base on bigger screens */
+    .app-header h1 { font-size: 1.8em; }
+}
+
+/* Adding a placeholder for logo.png if you don't have one */
+.modal-logo, .header-logo {
+    background-color: var(--accent-color); /* Placeholder color */
+    border-radius: 50%; /* Make it a circle or square as you like */
+    width: 40px; /* Adjust as needed */
+    height: 40px;
+    display: inline-block; /* Or block if on its own line */
+    text-align: center;
+    line-height: 40px; /* Vertically center text if you put initials */
+    font-weight: bold;
+    color: white;
+    content: "FS"; /* Initials, or remove if just a shape */
+}
+.modal-logo {
+    height: 50px; width: 50px; line-height: 50px;
 }
