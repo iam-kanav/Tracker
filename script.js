@@ -1,438 +1,442 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
+    // --- STATE ---
+    let appState = {
+        settings: {
+            initialBankBalance: 0,
+            fixedMinimum: 0,
+            dailySpendingGoal: 300,
+            setupComplete: false,
+        },
+        transactions: [],
+        ui: {
+            currentFilterMonthYear: '', // YYYY-MM
+            editingTransactionId: null,
+        }
+    };
+
+    // --- DOM ELEMENTS ---
+    // Modals
     const setupModal = document.getElementById('setupModal');
+    const transactionModal = document.getElementById('transactionModal');
+    // Setup Form
     const initialBalanceInput = document.getElementById('initialBalance');
     const fixedMinimumInput = document.getElementById('fixedMinimum');
     const dailyGoalInput = document.getElementById('dailyGoal');
-    const saveSetupBtn = document.getElementById('saveSetup');
-
-    const overviewSection = document.getElementById('overviewSection');
-    const monthlyAllocationSection = document.getElementById('monthlyAllocationSection');
-    const dailyTrackerSection = document.getElementById('dailyTrackerSection');
-    const actionsSection = document.getElementById('actionsSection');
-    const transactionsListSection = document.getElementById('transactionsListSection');
-    const rulesGoalsSection = document.getElementById('rulesGoalsSection');
-
-
-    const usableFundsEl = document.getElementById('usableFunds');
-    const patreonEstEl = document.getElementById('patreonEst'); // For display, actual is logged
-    const fixedMinimumDisplayEl = document.getElementById('fixedMinimumDisplay');
-
-
-    const totalIncomeMonthEl = document.getElementById('totalIncomeMonth');
-    const toMotherEl = document.getElementById('toMother');
-    const netAvailableEl = document.getElementById('netAvailable');
-    const targetSavingsEl = document.getElementById('targetSavings');
-    const spendingBudgetEl = document.getElementById('spendingBudget');
-    const actualSpentMonthEl = document.getElementById('actualSpentMonth');
-    const budgetRemainingEl = document.getElementById('budgetRemaining');
-    const actualSavedMonthEl = document.getElementById('actualSavedMonth');
-
-
-    const dailySpendTotalEl = document.getElementById('dailySpendTotal');
-    const dailySpendProgressEl = document.getElementById('dailySpendProgress');
-    const dailySpendingGoalDisplayEl = document.getElementById('dailySpendingGoalDisplay');
-    const ruleDailyGoalEl = document.getElementById('ruleDailyGoal');
-
-
-    const addTransactionBtn = document.getElementById('addTransactionBtn');
-    const transactionModal = document.getElementById('transactionModal');
-    const closeTransactionModalBtn = document.getElementById('closeTransactionModal');
-    const saveTransactionBtn = document.getElementById('saveTransactionBtn');
+    const saveSetupBtn = document.getElementById('saveSetupBtn');
+    // Main Content Area
+    const mainContent = document.getElementById('mainContent');
+    // Header
+    const currentMonthYearDisplay = document.getElementById('currentMonthYearDisplay');
+    // Dashboard
+    const usableFundsDisplay = document.getElementById('usableFundsDisplay');
+    const dailySpendTotalDisplay = document.getElementById('dailySpendTotalDisplay');
+    const dailySpendProgressBar = document.getElementById('dailySpendProgressBar');
+    const dailySpendingGoalMainDisplay = document.getElementById('dailySpendingGoalMainDisplay');
+    // Monthly Summary
+    const totalIncomeMonthDisplay = document.getElementById('totalIncomeMonthDisplay');
+    const toMotherDisplay = document.getElementById('toMotherDisplay');
+    const netAvailableDisplay = document.getElementById('netAvailableDisplay');
+    const targetSavingsDisplay = document.getElementById('targetSavingsDisplay');
+    const spendingBudgetDisplay = document.getElementById('spendingBudgetDisplay');
+    const actualSpentMonthDisplay = document.getElementById('actualSpentMonthDisplay');
+    const budgetRemainingDisplay = document.getElementById('budgetRemainingDisplay');
+    const actualSavedMonthDisplay = document.getElementById('actualSavedMonthDisplay');
+    // Transaction List & Filter
+    const monthFilter = document.getElementById('monthFilter');
+    const transactionListUl = document.getElementById('transactionList');
+    // Transaction Modal Form
+    const transactionModalTitle = document.getElementById('transactionModalTitle');
+    const editingTransactionIdInput = document.getElementById('editingTransactionId');
     const transactionTypeInput = document.getElementById('transactionType');
     const transactionAmountInput = document.getElementById('transactionAmount');
     const transactionCategoryInput = document.getElementById('transactionCategory');
     const transactionDateInput = document.getElementById('transactionDate');
     const transactionDescriptionInput = document.getElementById('transactionDescription');
+    const saveTransactionBtn = document.getElementById('saveTransactionBtn');
+    // FAB & Other Buttons
+    const fabAddTransaction = document.getElementById('fabAddTransaction');
+    const resetDataAppBtn = document.getElementById('resetDataAppBtn');
+    // Rules
+    const ruleDailyGoalDisplay = document.getElementById('ruleDailyGoalDisplay');
+    // Footer
+    const currentYearDisplay = document.getElementById('currentYear');
 
-    const transactionsUl = document.getElementById('transactionsUl');
-    const monthFilterEl = document.getElementById('monthFilter');
-    const resetDataBtn = document.getElementById('resetDataBtn');
-    const currentMonthYearEl = document.getElementById('currentMonthYear');
-    const todayDateEl = document.getElementById('todayDate');
-
-
-    let settings = {
-        initialBankBalance: 0,
-        fixedMinimum: 0,
-        dailySpendingGoal: 300,
-        patreonEstimate: 10000 // Default, can be changed if needed
+    // --- LOCAL STORAGE FUNCTIONS ---
+    const STORAGE_KEYS = {
+        SETTINGS: 'finScribeSettings_v2',
+        TRANSACTIONS: 'finScribeTransactions_v2'
     };
-    let transactions = [];
-    let currentFilterMonthYear = '';
 
-    // ---- INITIALIZATION & SETUP ----
-    function init() {
-        loadSettings();
-        loadTransactions();
-
-        if (!settings.initialBankBalance) { // Or some other check to see if setup is done
-            setupModal.style.display = 'block';
-            // Hide main content until setup is complete
-            document.querySelectorAll('section:not(.actions), header').forEach(el => {
-                if (el.id !== "setupModal" && !el.closest('.modal')) el.style.display = 'none';
-            });
-        } else {
-            displayAppContent();
-        }
-        
-        addEventListeners();
-        updateUI();
+    function saveState() {
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(appState.settings));
+        localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(appState.transactions));
     }
 
-    function displayAppContent() {
-        setupModal.style.display = 'none';
-        overviewSection.style.display = 'block';
-        monthlyAllocationSection.style.display = 'block';
-        dailyTrackerSection.style.display = 'block';
-        actionsSection.style.display = 'block';
-        transactionsListSection.style.display = 'block';
-        rulesGoalsSection.style.display = 'block';
-        document.querySelector('header').style.display = 'block'; // Show header
-    }
-
-    saveSetupBtn.addEventListener('click', () => {
-        const initialBalance = parseFloat(initialBalanceInput.value);
-        const fixedMinimum = parseFloat(fixedMinimumInput.value);
-        const dailyGoal = parseFloat(dailyGoalInput.value);
-
-        if (isNaN(initialBalance) || isNaN(fixedMinimum) || isNaN(dailyGoal) || initialBalance <= 0 || fixedMinimum < 0 || dailyGoal <= 0) {
-            alert('Please enter valid numbers for all fields.');
-            return;
-        }
-        if (fixedMinimum > initialBalance) {
-            alert('Fixed minimum cannot be greater than initial balance.');
-            return;
-        }
-
-        settings.initialBankBalance = initialBalance;
-        settings.fixedMinimum = fixedMinimum;
-        settings.dailySpendingGoal = dailyGoal;
-        
-        saveSettings();
-        displayAppContent();
-        updateUI(); // Call updateUI after settings are saved and content is displayed
-    });
-    
-    // ---- DATA PERSISTENCE (LOCAL STORAGE) ----
-    function saveSettings() {
-        localStorage.setItem('financeTrackerSettings', JSON.stringify(settings));
-    }
-
-    function loadSettings() {
-        const storedSettings = localStorage.getItem('financeTrackerSettings');
+    function loadState() {
+        const storedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
         if (storedSettings) {
-            settings = JSON.parse(storedSettings);
+            appState.settings = JSON.parse(storedSettings);
         }
-    }
-
-    function saveTransactions() {
-        localStorage.setItem('financeTrackerTransactions', JSON.stringify(transactions));
-    }
-
-    function loadTransactions() {
-        const storedTransactions = localStorage.getItem('financeTrackerTransactions');
+        const storedTransactions = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS);
         if (storedTransactions) {
-            transactions = JSON.parse(storedTransactions).map(t => ({
+            appState.transactions = JSON.parse(storedTransactions).map(t => ({
                 ...t,
                 date: new Date(t.date) // Ensure date is a Date object
             }));
         }
     }
 
-    // ---- EVENT LISTENERS ----
+    // --- INITIALIZATION ---
+    function init() {
+        loadState();
+        currentYearDisplay.textContent = new Date().getFullYear();
+
+        if (!appState.settings.setupComplete) {
+            setupModal.classList.add('active');
+            mainContent.style.display = 'none';
+        } else {
+            mainContent.style.display = 'block';
+            setupModal.classList.remove('active');
+            const today = new Date();
+            appState.ui.currentFilterMonthYear = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            renderApp();
+        }
+        addEventListeners();
+    }
+
+    // --- EVENT LISTENERS ---
     function addEventListeners() {
-        addTransactionBtn.addEventListener('click', openTransactionModal);
-        closeTransactionModalBtn.addEventListener('click', closeTransactionModal);
+        saveSetupBtn.addEventListener('click', handleSaveSetup);
+        fabAddTransaction.addEventListener('click', () => openTransactionModal());
         saveTransactionBtn.addEventListener('click', handleSaveTransaction);
+        monthFilter.addEventListener('change', handleMonthFilterChange);
+        resetDataAppBtn.addEventListener('click', handleResetData);
+
+        // Close modal buttons
+        document.querySelectorAll('.close-modal-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modalId = btn.dataset.modalId;
+                if (modalId) document.getElementById(modalId).classList.remove('active');
+            });
+        });
+         // Close modal on outside click
         window.addEventListener('click', (event) => {
-            if (event.target == transactionModal) {
-                closeTransactionModal();
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
             }
         });
-        monthFilterEl.addEventListener('change', (e) => {
-            currentFilterMonthYear = e.target.value;
-            renderTransactions();
-            updateMonthlyAllocations(); // Re-calculate for the selected month
-        });
-        resetDataBtn.addEventListener('click', handleResetData);
     }
 
-    function handleResetData() {
-        if (confirm('Are you sure you want to reset ALL data? This cannot be undone.')) {
-            localStorage.removeItem('financeTrackerSettings');
-            localStorage.removeItem('financeTrackerTransactions');
-            // Reset in-memory state
-            settings = { initialBankBalance: 0, fixedMinimum: 0, dailySpendingGoal: 300, patreonEstimate: 10000 };
-            transactions = [];
-            currentFilterMonthYear = '';
-            // Hide main content and show setup modal
-             document.querySelectorAll('section:not(.actions), header').forEach(el => {
-                if (el.id !== "setupModal" && !el.closest('.modal')) el.style.display = 'none';
-            });
-            overviewSection.style.display = 'none';
-            monthlyAllocationSection.style.display = 'none';
-            dailyTrackerSection.style.display = 'none';
-            actionsSection.style.display = 'none';
-            transactionsListSection.style.display = 'none';
-            rulesGoalsSection.style.display = 'none';
-            setupModal.style.display = 'block';
-            initialBalanceInput.value = '';
-            fixedMinimumInput.value = '';
-            dailyGoalInput.value = '';
+    // --- HANDLERS ---
+    function handleSaveSetup() {
+        const initialBalance = parseFloat(initialBalanceInput.value);
+        const fixedMinimum = parseFloat(fixedMinimumInput.value);
+        const dailyGoal = parseFloat(dailyGoalInput.value);
 
-            updateUI(); // Clear the UI
+        if (isNaN(initialBalance) || isNaN(fixedMinimum) || isNaN(dailyGoal) || dailyGoal <= 0) {
+            alert('Please enter valid numbers for all fields. Daily goal must be positive.');
+            return;
         }
-    }
+        if (fixedMinimum < 0) {
+             alert('Fixed minimum cannot be negative.');
+            return;
+        }
+        if (initialBalance < fixedMinimum) {
+            alert('Initial balance cannot be less than fixed minimum.');
+            return;
+        }
 
-    // ---- MODAL MANAGEMENT ----
-    function openTransactionModal() {
-        transactionModal.style.display = 'block';
+        appState.settings.initialBankBalance = initialBalance;
+        appState.settings.fixedMinimum = fixedMinimum;
+        appState.settings.dailySpendingGoal = dailyGoal;
+        appState.settings.setupComplete = true;
+        
+        saveState();
+        setupModal.classList.remove('active');
+        mainContent.style.display = 'block';
+        const today = new Date();
+        appState.ui.currentFilterMonthYear = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+        renderApp();
+    }
+    
+    function openTransactionModal(transactionToEdit = null) {
+        transactionModal.classList.add('active');
         transactionDateInput.valueAsDate = new Date(); // Default to today
         transactionAmountInput.value = '';
         transactionDescriptionInput.value = '';
-        transactionTypeInput.value = 'expense'; // Default to expense
+        transactionCategoryInput.value = 'Food'; // Default category
+        transactionTypeInput.value = 'expense'; // Default type
+        editingTransactionIdInput.value = '';
+        transactionModalTitle.textContent = 'Add Transaction';
+
+        if (transactionToEdit) {
+            transactionModalTitle.textContent = 'Edit Transaction';
+            editingTransactionIdInput.value = transactionToEdit.id;
+            transactionTypeInput.value = transactionToEdit.type;
+            transactionAmountInput.value = transactionToEdit.amount;
+            transactionCategoryInput.value = transactionToEdit.category;
+            transactionDescriptionInput.value = transactionToEdit.description;
+            // Format date correctly for input type="date"
+            const yyyy = transactionToEdit.date.getFullYear();
+            const mm = String(transactionToEdit.date.getMonth() + 1).padStart(2, '0');
+            const dd = String(transactionToEdit.date.getDate()).padStart(2, '0');
+            transactionDateInput.value = `${yyyy}-${mm}-${dd}`;
+        }
     }
 
-    function closeTransactionModal() {
-        transactionModal.style.display = 'none';
-    }
-
-    // ---- TRANSACTION HANDLING ----
     function handleSaveTransaction() {
         const type = transactionTypeInput.value;
         const amount = parseFloat(transactionAmountInput.value);
         const category = transactionCategoryInput.value;
-        const date = new Date(transactionDateInput.value);
+        const dateString = transactionDateInput.value;
         const description = transactionDescriptionInput.value.trim();
+        const editingId = editingTransactionIdInput.value;
 
         if (isNaN(amount) || amount <= 0) {
-            alert('Please enter a valid amount.');
+            alert('Please enter a valid positive amount.');
             return;
         }
-        if (!transactionDateInput.value) {
+        if (!dateString) {
             alert('Please select a date.');
             return;
         }
-        // Adjust date to avoid timezone issues by setting time to noon
-        date.setHours(12,0,0,0);
+        // Parse date string to avoid timezone issues, ensuring it's treated as local
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day, 12, 0, 0); // Set to noon to be safe
 
 
-        const newTransaction = {
-            id: Date.now().toString(), // Simple unique ID
-            type,
-            amount,
-            category,
-            date,
-            description
-        };
+        if (editingId) { // Editing existing transaction
+            const index = appState.transactions.findIndex(t => t.id === editingId);
+            if (index > -1) {
+                appState.transactions[index] = { ...appState.transactions[index], type, amount, category, date, description };
+            }
+        } else { // Adding new transaction
+            const newTransaction = {
+                id: Date.now().toString(),
+                type, amount, category, date, description
+            };
+            appState.transactions.push(newTransaction);
+        }
+        
+        appState.transactions.sort((a, b) => b.date - a.date); // Sort by date descending
+        saveState();
+        renderApp();
+        transactionModal.classList.remove('active');
+    }
 
-        transactions.push(newTransaction);
-        transactions.sort((a, b) => b.date - a.date); // Sort by date descending
-        saveTransactions();
-        updateUI();
-        closeTransactionModal();
+    function handleDeleteTransaction(id) {
+        if (confirm('Are you sure you want to delete this transaction?')) {
+            appState.transactions = appState.transactions.filter(t => t.id !== id);
+            saveState();
+            renderApp();
+        }
+    }
+
+    function handleMonthFilterChange(e) {
+        appState.ui.currentFilterMonthYear = e.target.value;
+        renderApp(); // Re-render everything based on new filter
     }
     
-    function deleteTransaction(id) {
-        if (confirm('Are you sure you want to delete this transaction?')) {
-            transactions = transactions.filter(t => t.id !== id);
-            saveTransactions();
-            updateUI();
+    function handleResetData() {
+        if (confirm('DANGER! This will erase ALL your financial data and reset the app. Are you absolutely sure?')) {
+            localStorage.removeItem(STORAGE_KEYS.SETTINGS);
+            localStorage.removeItem(STORAGE_KEYS.TRANSACTIONS);
+            // Reset in-memory state to defaults
+            appState.settings = { initialBankBalance: 0, fixedMinimum: 0, dailySpendingGoal: 300, setupComplete: false };
+            appState.transactions = [];
+            appState.ui.currentFilterMonthYear = '';
+            appState.ui.editingTransactionId = null;
+            
+            // Show setup modal, hide main content
+            setupModal.classList.add('active');
+            mainContent.style.display = 'none';
+            // Clear form fields in setup modal
+            initialBalanceInput.value = '';
+            fixedMinimumInput.value = '';
+            dailyGoalInput.value = '';
+            // No need to call renderApp() as setup screen will be shown
         }
     }
 
+    // --- CALCULATIONS ---
+    function getFilteredTransactions(monthYear) {
+        if (!monthYear) return [];
+        const [year, month] = monthYear.split('-').map(Number);
+        return appState.transactions.filter(t => {
+            const tDate = new Date(t.date);
+            return tDate.getFullYear() === year && (tDate.getMonth() + 1) === month;
+        });
+    }
 
-    // ---- UI UPDATES & CALCULATIONS ----
-    function updateUI() {
-        if (!settings.initialBankBalance) return; // Don't update if setup not done
-
-        const today = new Date();
-        today.setHours(0,0,0,0); // Normalize today for comparisons
-
-        // Populate month filter
-        populateMonthFilter();
-        if (!currentFilterMonthYear && transactions.length > 0) {
-            const latestTransactionDate = transactions[0].date; // Assuming sorted
-             currentFilterMonthYear = `${latestTransactionDate.getFullYear()}-${String(latestTransactionDate.getMonth() + 1).padStart(2, '0')}`;
-             monthFilterEl.value = currentFilterMonthYear;
-        } else if (!currentFilterMonthYear) {
-            currentFilterMonthYear = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-            monthFilterEl.value = currentFilterMonthYear;
-        }
-
-
-        // Header Date
-        const currentDisplayMonth = new Date(currentFilterMonthYear + "-01T12:00:00"); // Use noon to avoid TZ issues
-        currentMonthYearEl.textContent = currentDisplayMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-        todayDateEl.textContent = today.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-
-
-        // Overview
-        patreonEstEl.textContent = `₹${settings.patreonEstimate.toLocaleString()}`;
-        fixedMinimumDisplayEl.textContent = `₹${settings.fixedMinimum.toLocaleString()}`;
-        
-        // Calculate total income and expenses up to now
+    function calculateOverallBalances() {
         let totalIncomeAllTime = 0;
         let totalExpensesAllTime = 0;
-        transactions.forEach(t => {
+        appState.transactions.forEach(t => {
             if (t.type === 'income') totalIncomeAllTime += t.amount;
             else totalExpensesAllTime += t.amount;
         });
-        const currentUsable = settings.initialBankBalance - settings.fixedMinimum + totalIncomeAllTime - totalExpensesAllTime;
-        usableFundsEl.textContent = `₹${currentUsable.toLocaleString()}`;
+        const usableFunds = appState.settings.initialBankBalance - appState.settings.fixedMinimum + totalIncomeAllTime - totalExpensesAllTime;
+        return { usableFunds };
+    }
 
+    function calculateMonthlySummary(transactionsForMonth) {
+        let incomeThisMonth = 0;
+        let expensesThisMonth = 0;
+        transactionsForMonth.forEach(t => {
+            if (t.type === 'income') incomeThisMonth += t.amount;
+            else expensesThisMonth += t.amount;
+        });
 
-        // Monthly Allocations (for the *filtered* month)
-        updateMonthlyAllocations();
-        
-        // Daily Spending
-        const dailyGoal = settings.dailySpendingGoal;
+        const motherShare = incomeThisMonth * 0.30;
+        const netAvailable = incomeThisMonth - motherShare;
+        const targetSavings = netAvailable * 0.40;
+        const spendingBudget = netAvailable * 0.60; // Or netAvailable - targetSavings
+        const budgetRemaining = spendingBudget - expensesThisMonth;
+        const actualSaved = incomeThisMonth - expensesThisMonth; // This is total income minus total expenses for the month
+
+        return {
+            incomeThisMonth, expensesThisMonth, motherShare, netAvailable,
+            targetSavings, spendingBudget, budgetRemaining, actualSaved
+        };
+    }
+
+    function calculateDailySpending() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalize today
         let dailySpend = 0;
-        transactions.forEach(t => {
+        appState.transactions.forEach(t => {
             const tDate = new Date(t.date);
-            tDate.setHours(0,0,0,0); // Normalize transaction date
+            tDate.setHours(0, 0, 0, 0); // Normalize transaction date
             if (t.type === 'expense' && tDate.getTime() === today.getTime()) {
                 dailySpend += t.amount;
             }
         });
-        dailySpendTotalEl.textContent = `₹${dailySpend.toLocaleString()}`;
-        dailySpendingGoalDisplayEl.textContent = `₹${dailyGoal.toLocaleString()}`;
-        ruleDailyGoalEl.textContent = `₹${dailyGoal.toLocaleString()}`;
+        return dailySpend;
+    }
 
+    // --- RENDER FUNCTIONS ---
+    function formatCurrency(amount) {
+        return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
 
-        const progressPercent = Math.min((dailySpend / dailyGoal) * 100, 100);
-        dailySpendProgressEl.style.width = `${progressPercent}%`;
-        dailySpendProgressEl.textContent = `₹${dailySpend}`;
-        if (dailySpend > dailyGoal) {
-            dailySpendProgressEl.classList.add('over-limit');
-        } else {
-            dailySpendProgressEl.classList.remove('over-limit');
+    function renderApp() {
+        if (!appState.settings.setupComplete) return; // Don't render if setup not done
+
+        populateMonthFilter(); // Needs to be done before setting filter value
+        
+        // Set current month for display and filter if not already set
+        if (!appState.ui.currentFilterMonthYear) {
+            const today = new Date();
+            appState.ui.currentFilterMonthYear = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         }
+        monthFilter.value = appState.ui.currentFilterMonthYear; // Ensure filter dropdown reflects current state
 
-        renderTransactions();
+        const [currentYear, currentMonthNum] = appState.ui.currentFilterMonthYear.split('-');
+        const displayDate = new Date(currentYear, currentMonthNum - 1, 1);
+        currentMonthYearDisplay.textContent = displayDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        
+        // Overall Balances
+        const { usableFunds } = calculateOverallBalances();
+        usableFundsDisplay.textContent = formatCurrency(usableFunds);
+
+        // Daily Spending
+        const dailySpend = calculateDailySpending();
+        const dailyGoal = appState.settings.dailySpendingGoal;
+        dailySpendTotalDisplay.textContent = formatCurrency(dailySpend);
+        dailySpendingGoalMainDisplay.textContent = formatCurrency(dailyGoal);
+        ruleDailyGoalDisplay.textContent = formatCurrency(dailyGoal); // Update rule display
+
+        const dailyProgress = Math.min((dailySpend / dailyGoal) * 100, 100);
+        dailySpendProgressBar.style.width = `${dailyProgress}%`;
+        dailySpendProgressBar.className = 'progress-bar'; // Reset classes
+        if (dailySpend > dailyGoal) dailySpendProgressBar.classList.add('danger');
+        else if (dailySpend > dailyGoal * 0.75) dailySpendProgressBar.classList.add('warning');
+
+        // Monthly Summary for the filtered month
+        const transactionsForSelectedMonth = getFilteredTransactions(appState.ui.currentFilterMonthYear);
+        const summary = calculateMonthlySummary(transactionsForSelectedMonth);
+        totalIncomeMonthDisplay.textContent = formatCurrency(summary.incomeThisMonth);
+        toMotherDisplay.textContent = formatCurrency(summary.motherShare);
+        netAvailableDisplay.textContent = formatCurrency(summary.netAvailable);
+        targetSavingsDisplay.textContent = formatCurrency(summary.targetSavings);
+        spendingBudgetDisplay.textContent = formatCurrency(summary.spendingBudget);
+        actualSpentMonthDisplay.textContent = formatCurrency(summary.expensesThisMonth);
+        budgetRemainingDisplay.textContent = formatCurrency(summary.budgetRemaining);
+        budgetRemainingDisplay.classList.toggle('negative', summary.budgetRemaining < 0);
+        actualSavedMonthDisplay.textContent = formatCurrency(summary.actualSaved);
+
+        renderTransactionList(transactionsForSelectedMonth);
     }
-
-    function updateMonthlyAllocations() {
-        const [year, month] = currentFilterMonthYear.split('-').map(Number);
-
-        let incomeThisMonth = 0;
-        let expensesThisMonth = 0;
-
-        transactions.forEach(t => {
-            const tDate = new Date(t.date);
-            if (tDate.getFullYear() === year && (tDate.getMonth() + 1) === month) {
-                if (t.type === 'income') {
-                    incomeThisMonth += t.amount;
-                } else {
-                    expensesThisMonth += t.amount;
-                }
-            }
-        });
-        
-        totalIncomeMonthEl.textContent = `₹${incomeThisMonth.toLocaleString()}`;
-
-        const motherShare = incomeThisMonth * 0.30;
-        toMotherEl.textContent = `₹${motherShare.toLocaleString()}`;
-
-        const net = incomeThisMonth - motherShare;
-        netAvailableEl.textContent = `₹${net.toLocaleString()}`;
-
-        const savingsTarget = net * 0.40;
-        targetSavingsEl.textContent = `₹${savingsTarget.toLocaleString()}`;
-        
-        const spendingBudgetCalc = net * 0.60;
-        spendingBudgetEl.textContent = `₹${spendingBudgetCalc.toLocaleString()}`;
-        
-        actualSpentMonthEl.textContent = `₹${expensesThisMonth.toLocaleString()}`;
-
-        const budgetRem = spendingBudgetCalc - expensesThisMonth;
-        budgetRemainingEl.textContent = `₹${budgetRem.toLocaleString()}`;
-        budgetRemainingEl.style.color = budgetRem < 0 ? 'var(--danger-color)' : 'var(--primary-text-color)';
-
-        const actualSaved = incomeThisMonth - expensesThisMonth; // Simple version: what's left of income
-        actualSavedMonthEl.textContent = `₹${actualSaved.toLocaleString()}`;
-    }
-
 
     function populateMonthFilter() {
         const SmonthYears = new Set();
-        // Add current month/year by default if no transactions
         const today = new Date();
+        // Always add current month to filter options
         SmonthYears.add(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`);
 
-        transactions.forEach(t => {
+        appState.transactions.forEach(t => {
             const date = new Date(t.date);
             SmonthYears.add(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`);
         });
         
         const sortedMonthYears = Array.from(SmonthYears).sort().reverse(); // Most recent first
         
-        monthFilterEl.innerHTML = ''; // Clear existing options
+        const currentFilterValue = monthFilter.value; // Preserve current selection if possible
+        monthFilter.innerHTML = ''; // Clear existing options
+        
         sortedMonthYears.forEach(my => {
             const option = document.createElement('option');
             option.value = my;
             const [year, monthNum] = my.split('-');
             const dateForDisplay = new Date(year, monthNum - 1, 1);
             option.textContent = dateForDisplay.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-            monthFilterEl.appendChild(option);
+            monthFilter.appendChild(option);
         });
 
-        if (currentFilterMonthYear && SmonthYears.has(currentFilterMonthYear)) {
-            monthFilterEl.value = currentFilterMonthYear;
+        // Restore selection or set to latest
+        if (sortedMonthYears.includes(currentFilterValue)) {
+            monthFilter.value = currentFilterValue;
         } else if (sortedMonthYears.length > 0) {
-            monthFilterEl.value = sortedMonthYears[0];
-            currentFilterMonthYear = sortedMonthYears[0];
+            monthFilter.value = sortedMonthYears[0];
+            appState.ui.currentFilterMonthYear = sortedMonthYears[0]; // Update state if it was invalid
         }
     }
 
-    function renderTransactions() {
-        transactionsUl.innerHTML = ''; // Clear existing list
-        
-        const [filterYear, filterMonth] = currentFilterMonthYear ? currentFilterMonthYear.split('-').map(Number) : [null, null];
-
-        const filteredTransactions = transactions.filter(t => {
-            if (!filterYear || !filterMonth) return true; // Show all if no filter
-            const tDate = new Date(t.date);
-            return tDate.getFullYear() === filterYear && (tDate.getMonth() + 1) === filterMonth;
-        });
-
-
-        if (filteredTransactions.length === 0) {
-            transactionsUl.innerHTML = '<li>No transactions for this period.</li>';
+    function renderTransactionList(transactionsToRender) {
+        transactionListUl.innerHTML = ''; // Clear
+        if (transactionsToRender.length === 0) {
+            transactionListUl.innerHTML = '<li class="no-transactions">No transactions for this period.</li>';
             return;
         }
 
-        filteredTransactions.forEach(t => {
+        transactionsToRender.forEach(t => {
             const li = document.createElement('li');
+            const iconClass = t.type === 'income' ? 'fa-arrow-up' : 'fa-arrow-down';
+            const amountClass = t.type === 'income' ? 'income' : 'expense';
+            const sign = t.type === 'income' ? '+' : '-';
             
-            const datePart = new Date(t.date).toLocaleDateString('en-GB', {day:'2-digit', month:'short'}); // DD MMM
-
             li.innerHTML = `
-                <div class="details">
+                <span class="transaction-icon ${amountClass}"><i class="fas ${iconClass}"></i></span>
+                <div class="transaction-details">
                     <span class="description">${t.description || t.category}</span>
-                    <span class="category">${t.category} - ${datePart}</span>
+                    <span class="category-date">${t.category} - ${new Date(t.date).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'2-digit'})}</span>
                 </div>
-                <span class="amount ${t.type}">
-                    ${t.type === 'income' ? '+' : '-'}₹${t.amount.toLocaleString()}
-                </span>
-                <button class="delete-btn" data-id="${t.id}"><i class="fas fa-trash-alt"></i></button>
+                <span class="transaction-amount ${amountClass}">${sign}${formatCurrency(t.amount)}</span>
+                <div class="transaction-actions">
+                    <button class="edit" data-id="${t.id}" title="Edit"><i class="fas fa-edit"></i></button>
+                    <button class="delete" data-id="${t.id}" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                </div>
             `;
-            transactionsUl.appendChild(li);
-
-            li.querySelector('.delete-btn').addEventListener('click', (e) => {
-                 // Traverse up to ensure correct button if icon is clicked
-                let targetButton = e.target;
-                while (targetButton && !targetButton.dataset.id) {
-                    targetButton = targetButton.parentElement;
-                }
-                if (targetButton) {
-                    deleteTransaction(targetButton.dataset.id);
-                }
+            transactionListUl.appendChild(li);
+            
+li.querySelector('.edit').addEventListener('click', () => {
+                const transaction = appState.transactions.find(trans => trans.id === t.id);
+                if (transaction) openTransactionModal(transaction);
             });
+            li.querySelector('.delete').addEventListener('click', () => handleDeleteTransaction(t.id));
         });
     }
 
-    // ---- START THE APP ----
+    // --- START THE APP ---
     init();
 });
