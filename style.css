@@ -1,0 +1,314 @@
+:root {
+    --bg-color: #1e1e1e; /* Dark background */
+    --surface-color: #2d2d2d; /* Slightly lighter for cards/sections */
+    --primary-text-color: #e0e0e0; /* Light grey text */
+    --secondary-text-color: #a0a0a0; /* Dimmer text */
+    --accent-color: #00aaff; /* A vibrant blue */
+    --accent-color-darker: #0077cc;
+    --danger-color: #e74c3c;
+    --success-color: #2ecc71;
+    --font-family: 'Roboto', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    color: var(--primary-text-color);
+    line-height: 1.6;
+    padding: 15px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: var(--surface-color);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 15px;
+}
+
+header h1 {
+    color: var(--accent-color);
+    margin-bottom: 5px;
+}
+
+header .date-display {
+    font-size: 0.9em;
+    color: var(--secondary-text-color);
+}
+
+h2 {
+    color: var(--accent-color);
+    margin-bottom: 15px;
+    font-size: 1.4em;
+    border-bottom: 1px solid #444;
+    padding-bottom: 8px;
+}
+
+section {
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: #333; /* Slightly different section background */
+    border-radius: 6px;
+}
+
+.overview-item, .monthly-allocation .overview-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.95em;
+    border-bottom: 1px dashed #4f4f4f;
+}
+.overview-item:last-child, .monthly-allocation .overview-item:last-child {
+    border-bottom: none;
+}
+
+.overview-item span:first-child {
+    color: var(--secondary-text-color);
+}
+.overview-item span:last-child {
+    font-weight: 500;
+    color: var(--primary-text-color);
+}
+
+.daily-tracker .overview-item {
+    border-bottom: none;
+}
+.progress-bar-container {
+    width: 100%;
+    background-color: #555;
+    border-radius: 4px;
+    margin: 5px 0 5px;
+    height: 18px;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--success-color);
+    border-radius: 4px;
+    text-align: center;
+    color: white;
+    font-size: 0.8em;
+    line-height: 18px;
+    transition: width 0.3s ease-in-out;
+}
+.progress-bar.over-limit {
+    background-color: var(--danger-color);
+}
+
+.daily-tracker small {
+    font-size: 0.85em;
+    color: var(--secondary-text-color);
+}
+
+.actions {
+    text-align: center;
+}
+
+.actions button, .modal-content button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.actions button:hover, .modal-content button:hover {
+    background-color: var(--accent-color-darker);
+}
+
+.actions button i {
+    margin-right: 8px;
+}
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    padding-top: 30px; /* Reduced padding for mobile */
+}
+
+.modal-content {
+    background-color: var(--surface-color);
+    margin: 5% auto; /* Centered */
+    padding: 25px;
+    border: 1px solid #555;
+    width: 90%; /* Responsive width */
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.modal-content h2 {
+    margin-top: 0;
+}
+
+.modal-content div {
+    margin-bottom: 15px;
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+    color: var(--secondary-text-color);
+}
+
+.modal-content input[type="number"],
+.modal-content input[type="text"],
+.modal-content input[type="date"],
+.modal-content select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background-color: #444;
+    color: var(--primary-text-color);
+    font-size: 1em;
+}
+
+.close-btn {
+    color: var(--secondary-text-color);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: var(--primary-text-color);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Transactions List */
+.transactions-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.transactions-list li {
+    background-color: #3a3a3a;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+}
+
+.transactions-list li .details {
+    flex-grow: 1;
+}
+
+.transactions-list li .category {
+    font-size: 0.8em;
+    color: var(--secondary-text-color);
+    display: block;
+}
+.transactions-list li .description {
+    font-size: 0.9em;
+    color: var(--primary-text-color);
+     margin-top: 2px;
+}
+
+
+.transactions-list li .amount {
+    font-weight: 500;
+    min-width: 70px; /* Ensure amounts align somewhat */
+    text-align: right;
+}
+
+.transactions-list li .amount.income {
+    color: var(--success-color);
+}
+
+.transactions-list li .amount.expense {
+    color: var(--danger-color);
+}
+
+.transactions-list li .delete-btn {
+    background: none;
+    border: none;
+    color: var(--secondary-text-color);
+    cursor: pointer;
+    font-size: 1.1em;
+    margin-left: 10px;
+}
+.transactions-list li .delete-btn:hover {
+    color: var(--danger-color);
+}
+
+.filter-container {
+    margin-bottom: 15px;
+}
+.filter-container label {
+    margin-right: 10px;
+}
+.filter-container select {
+    padding: 8px;
+    background-color: #444;
+    color: var(--primary-text-color);
+    border: 1px solid #555;
+    border-radius: 4px;
+}
+
+
+.rules-goals ul {
+    list-style-position: inside;
+    padding-left: 0;
+}
+.rules-goals li {
+    margin-bottom: 8px;
+    font-size: 0.9em;
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 0.8em;
+    color: var(--secondary-text-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    .container {
+        padding: 15px;
+    }
+    .modal-content {
+        padding: 20px;
+    }
+    h1 {
+        font-size: 1.8em;
+    }
+    h2 {
+        font-size: 1.2em;
+    }
+}
