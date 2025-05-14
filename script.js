@@ -428,8 +428,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             transactionListUl.appendChild(li);
-            
-li.querySelector('.edit').addEventListener('click', () => {
+
+            li.querySelector('.edit').addEventListener('click', () => {
                 const transaction = appState.transactions.find(trans => trans.id === t.id);
                 if (transaction) openTransactionModal(transaction);
             });
