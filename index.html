@@ -2,179 +2,172 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Finance Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>FinScribe - Personal Finance</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1a2e">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Finance Summary</h1>
-            <p class="date-display" id="currentMonthYear">May 2025</p>
-        </header>
+    <div class="app-container">
 
         <!-- Initial Setup Modal -->
-        <div id="setupModal" class="modal">
+        <div id="setupModal" class="modal active">
             <div class="modal-content">
-                <h2>Initial Setup</h2>
-                <p>Please provide your starting financial details.</p>
+                <img src="logo.png" alt="FinScribe Logo" class="modal-logo"> <!-- Placeholder for a logo -->
+                <h2>Welcome to FinScribe!</h2>
+                <p>Let's get your finances set up.</p>
                 <div>
-                    <label for="initialBalance">Current Total Bank Balance (₹):</label>
+                    <label for="initialBalance"><i class="fas fa-wallet"></i> Current Total Bank Balance (₹):</label>
                     <input type="number" id="initialBalance" placeholder="e.g., 23225">
                 </div>
                 <div>
-                    <label for="fixedMinimum">Fixed Minimum (Not Usable) (₹):</label>
+                    <label for="fixedMinimum"><i class="fas fa-lock"></i> Fixed Minimum (Not Usable) (₹):</label>
                     <input type="number" id="fixedMinimum" placeholder="e.g., 5000">
                 </div>
                 <div>
-                    <label for="dailyGoal">Daily Spending Goal (₹):</label>
+                    <label for="dailyGoal"><i class="fas fa-bullseye"></i> Daily Spending Goal (₹):</label>
                     <input type="number" id="dailyGoal" placeholder="e.g., 300">
                 </div>
-                <button id="saveSetup">Save & Start</button>
+                <button id="saveSetupBtn" class="btn btn-primary btn-block"><i class="fas fa-save"></i> Save & Start</button>
             </div>
         </div>
 
-        <section class="overview" id="overviewSection" style="display: none;">
-            <h2>Overview</h2>
-            <div class="overview-item">
-                <span>Current Usable Funds:</span>
-                <span id="usableFunds">₹0</span>
-            </div>
-            <div class="overview-item">
-                <span>Patreon Income (Est.):</span>
-                <span id="patreonEst">₹10,000</span>
-            </div>
-             <div class="overview-item">
-                <span>Fixed Minimum (Not Usable):</span>
-                <span id="fixedMinimumDisplay">₹0</span>
-            </div>
-        </section>
+        <main id="mainContent" style="display: none;">
+            <header class="app-header">
+                <img src="logo.png" alt="FinScribe Logo" class="header-logo"> <!-- Placeholder for a logo -->
+                <h1>FinScribe</h1>
+                <div class="header-info">
+                    <span id="currentMonthYearDisplay">Month Year</span>
+                </div>
+            </header>
 
-        <section class="monthly-allocation" id="monthlyAllocationSection" style="display: none;">
-            <h2>Monthly Income & Allocation (Current Month)</h2>
-            <div class="overview-item">
-                <span>Total Income This Month:</span>
-                <span id="totalIncomeMonth">₹0</span>
-            </div>
-            <div class="overview-item">
-                <span>Sent to Mother (30%):</span>
-                <span id="toMother">₹0</span>
-            </div>
-            <div class="overview-item">
-                <span>Net Available to You:</span>
-                <span id="netAvailable">₹0</span>
-            </div>
-            <div class="overview-item">
-                <span>Target Savings (40% of Net):</span>
-                <span id="targetSavings">₹0</span>
-            </div>
-            <div class="overview-item">
-                <span>Spending Budget (60% of Net):</span>
-                <span id="spendingBudget">₹0</span>
-            </div>
-             <div class="overview-item">
-                <span>Actual Spent This Month:</span>
-                <span id="actualSpentMonth">₹0</span>
-            </div>
-            <div class="overview-item">
-                <span>Budget Remaining:</span>
-                <span id="budgetRemaining">₹0</span>
-            </div>
-            <div class="overview-item">
-                <span>Actual Saved This Month (Net Income - Spent):</span>
-                <span id="actualSavedMonth">₹0</span>
-            </div>
-        </section>
+            <section class="dashboard">
+                <div class="card main-balance-card">
+                    <h3><i class="fas fa-piggy-bank"></i> Usable Funds</h3>
+                    <p id="usableFundsDisplay" class="amount">₹0.00</p>
+                </div>
 
-        <section class="daily-tracker" id="dailyTrackerSection" style="display: none;">
-            <h2>Daily Spending Tracker</h2>
-            <div class="overview-item">
-                <span>Today's Spending (<span id="todayDate"></span>):</span>
-                <span id="dailySpendTotal">₹0</span>
-            </div>
-            <div class="progress-bar-container">
-                <div id="dailySpendProgress" class="progress-bar"></div>
-            </div>
-            <small>Goal: <span id="dailySpendingGoalDisplay">₹300</span></small>
-        </section>
+                <div class="card">
+                    <h3><i class="fas fa-calendar-day"></i> Today's Spending</h3>
+                    <div class="daily-spend-tracker">
+                        <p id="dailySpendTotalDisplay" class="amount-small">₹0.00</p>
+                        <div class="progress-bar-container">
+                            <div id="dailySpendProgressBar" class="progress-bar"></div>
+                        </div>
+                        <small>Goal: <span id="dailySpendingGoalMainDisplay">₹300.00</span></small>
+                    </div>
+                </div>
+            </section>
 
-        <section class="actions" id="actionsSection" style="display: none;">
-            <button id="addTransactionBtn"><i class="fas fa-plus-circle"></i> Add Transaction</button>
-        </section>
+            <section class="monthly-summary">
+                <h2><i class="fas fa-chart-pie"></i> Monthly Snapshot</h2>
+                <div class="card">
+                    <div class="summary-grid">
+                        <div><label><i class="fas fa-arrow-down"></i> Income:</label><span id="totalIncomeMonthDisplay">₹0.00</span></div>
+                        <div><label><i class="fas fa-hand-holding-heart"></i> To Mother (30%):</label><span id="toMotherDisplay">₹0.00</span></div>
+                        <div><label><i class="fas fa-user-circle"></i> Net Available:</label><span id="netAvailableDisplay">₹0.00</span></div>
+                        <div><label><i class="fas fa-archive"></i> Target Savings (40%):</label><span id="targetSavingsDisplay">₹0.00</span></div>
+                        <div><label><i class="fas fa-shopping-bag"></i> Spending Budget (60%):</label><span id="spendingBudgetDisplay">₹0.00</span></div>
+                        <div><label><i class="fas fa-credit-card"></i> Actual Spent:</label><span id="actualSpentMonthDisplay">₹0.00</span></div>
+                        <div class="budget-remaining">
+                            <label><i class="fas fa-tasks"></i> Budget Remaining:</label>
+                            <span id="budgetRemainingDisplay">₹0.00</span>
+                        </div>
+                        <div class="actual-saved">
+                            <label><i class="fas fa-check-circle"></i> Actual Saved:</label>
+                            <span id="actualSavedMonthDisplay">₹0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="transaction-section">
+                <div class="transaction-header">
+                    <h2><i class="fas fa-exchange-alt"></i> Transactions</h2>
+                    <div class="filter-controls">
+                        <label for="monthFilter"><i class="fas fa-filter"></i> Filter:</label>
+                        <select id="monthFilter"></select>
+                    </div>
+                </div>
+                <ul id="transactionList" class="transaction-list">
+                    <!-- <li class="no-transactions">No transactions yet. Add one!</li> -->
+                </ul>
+            </section>
+
+            <section class="finance-rules">
+                <h2><i class="fas fa-ruler-combined"></i> Your Rules</h2>
+                <div class="card">
+                    <ul>
+                        <li>Daily expense goal: under <span id="ruleDailyGoalDisplay">₹300</span>.</li>
+                        <li>30% of all income goes to your mother.</li>
+                        <li>Aim to save 40% of your net available funds.</li>
+                        <li>Enjoy spending (60% of net) while building a buffer.</li>
+                        <li>Review monthly & adapt.</li>
+                    </ul>
+                </div>
+            </section>
+             <button id="resetDataAppBtn" class="btn btn-danger btn-block" style="margin-top: 20px;"><i class="fas fa-power-off"></i> Reset All App Data</button>
+
+        </main>
 
         <!-- Add Transaction Modal -->
         <div id="transactionModal" class="modal">
             <div class="modal-content">
-                <span class="close-btn" id="closeTransactionModal">×</span>
-                <h2>Add New Transaction</h2>
+                <span class="close-modal-btn" data-modal-id="transactionModal"><i class="fas fa-times"></i></span>
+                <h3 id="transactionModalTitle">Add Transaction</h3>
+                <input type="hidden" id="editingTransactionId">
                 <div>
-                    <label for="transactionType">Type:</label>
+                    <label for="transactionType"><i class="fas fa-stream"></i> Type:</label>
                     <select id="transactionType">
                         <option value="expense">Expense</option>
                         <option value="income">Income</option>
                     </select>
                 </div>
                 <div>
-                    <label for="transactionAmount">Amount (₹):</label>
-                    <input type="number" id="transactionAmount" placeholder="0">
+                    <label for="transactionAmount"><i class="fas fa-rupee-sign"></i> Amount:</label>
+                    <input type="number" id="transactionAmount" placeholder="0.00">
                 </div>
                 <div>
-                    <label for="transactionCategory">Category:</label>
+                    <label for="transactionCategory"><i class="fas fa-tags"></i> Category:</label>
                     <select id="transactionCategory">
                         <option value="Food">Food</option>
                         <option value="Swiggy">Swiggy</option>
                         <option value="Patreon Income">Patreon Income</option>
+                        <option value="Other Income">Other Income</option>
                         <option value="Gifts">Gifts</option>
                         <option value="Entertainment">Entertainment</option>
                         <option value="Transport">Transport</option>
-                        <option value="Bills">Bills</option>
+                        <option value="Sent to Mother">Sent to Mother (Manual)</option>
                         <option value="Shopping">Shopping</option>
-                        <option value="Sent to Mother">Sent to Mother</option>
+                        <option value="Bills">Bills</option>
                         <option value="Other">Other</option>
                     </select>
                 </div>
                 <div>
-                    <label for="transactionDate">Date:</label>
+                    <label for="transactionDate"><i class="fas fa-calendar-alt"></i> Date:</label>
                     <input type="date" id="transactionDate">
                 </div>
                 <div>
-                    <label for="transactionDescription">Description (Optional):</label>
+                    <label for="transactionDescription"><i class="fas fa-info-circle"></i> Description (Optional):</label>
                     <input type="text" id="transactionDescription" placeholder="e.g., Lunch with friends">
                 </div>
-                <button id="saveTransactionBtn">Save Transaction</button>
+                <button id="saveTransactionBtn" class="btn btn-primary btn-block"><i class="fas fa-check"></i> Save Transaction</button>
             </div>
         </div>
 
-        <section class="transactions-list" id="transactionsListSection" style="display: none;">
-            <h2>Recent Transactions</h2>
-            <div class="filter-container">
-                <label for="monthFilter">Filter by Month:</label>
-                <select id="monthFilter"></select>
-            </div>
-            <ul id="transactionsUl">
-                <!-- Transactions will be listed here -->
-            </ul>
-        </section>
-
-         <section class="rules-goals" id="rulesGoalsSection" style="display: none;">
-            <h2>Personal Finance Rules / Goals</h2>
-            <ul>
-                <li>Daily expense goal: under <span id="ruleDailyGoal">₹300</span></li>
-                <li>30% of all income is non-negotiable for your mother.</li>
-                <li>40% of your remaining funds (Net Available) should be saved.</li>
-                <li>Maintain joy in spending while building a stable buffer.</li>
-                <li>Reassess monthly and adjust goals if income changes.</li>
-            </ul>
-        </section>
+        <!-- Floating Action Button -->
+        <button id="fabAddTransaction" class="fab" title="Add Transaction">
+            <i class="fas fa-plus"></i>
+        </button>
 
         <footer>
-            <p>FinScribe - Personal Tracker</p>
-             <button id="resetDataBtn" style="background-color: #c0392b; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; margin-top:10px;">Reset All Data</button>
+            <p>© <span id="currentYear"></span> FinScribe. Your Personal Finance Companion.</p>
         </footer>
-
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
